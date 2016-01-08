@@ -13,6 +13,7 @@ apt-get install ansible
 ```
 
 If you use the server as control machine you need to transfer the files to /etc/ansible/
+
 Using the roles on itself also requires the hosts file to contain
 ```
 local ansible_connection=local
