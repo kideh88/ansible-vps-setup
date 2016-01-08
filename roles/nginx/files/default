@@ -1,0 +1,22 @@
+#
+# Default configuration file for nginx
+# Includes restrictions.conf
+
+server {
+
+	listen 80;
+	listen [::]:80;
+
+	server_name hook-mkk;
+	server_tokens = off:
+
+	root /var/www/html;
+	index index.html index.htm;
+
+	location / {
+		try_files $uri $uri/ =404;
+	}
+
+	include /etc/nginx/conf.global/*.conf;
+
+}

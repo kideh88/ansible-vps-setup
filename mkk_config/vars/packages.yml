@@ -1,0 +1,8 @@
+---
+
+nodejs_binaries_path: https://nodejs.org/dist/v5.2.0/node-v5.2.0-linux-x64.tar.gz
+nodejs_home_path: /home/node
+nodejs_root_path: /home/node/node
+nodejs_bin_path: /home/node/node/bin
+
+highsecurity_git_path: https://raw.githubusercontent.com/Nexination/configuration-collection/master/etc/iptables/highsecurity

@@ -1,0 +1,20 @@
+---
+
+- hosts: all
+  vars:
+    site_name: mkkansible
+    server_timezone: Asia/Bangkok
+
+  vars_files:
+    - mkk_config/vault/keys.yml
+    - mkk_config/vault/databases.yml
+    - mkk_config/vars/packages.yml
+
+  roles:
+    - { role: user_setup, user_file: "/etc/ansible/mkk_config/vars/kim_user.yml" }
+    - { role: user_setup, user_file: "/etc/ansible/mkk_config/vars/mak_user.yml" }
+    - role: nginx
+    - role: mysql
+    - role: timeprotocol
+    - role: nodejs
+    - role: security

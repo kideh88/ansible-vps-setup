@@ -1,0 +1,12 @@
+---
+# Vault file to define the database config
+
+mysql_root_pass: somelongassstringgoesinhere
+
+new_databases:
+  - name: Main Test DB
+    user: test
+    pass: 1234
+    dbname: testdb
+    dbhost: localhost
+    dbencoding: utf8

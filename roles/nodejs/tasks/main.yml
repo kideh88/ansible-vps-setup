@@ -1,0 +1,63 @@
+- name: nodejs | Download source
+  get_url:
+    url: "{{nodejs_binaries_path}}"
+    dest: "{{nodejs_home_path}}"
+    mode: 0700
+  become: yes
+  become_user: node
+  register: node_source_downloaded
+
+- name: nodejs | Check node directory stat
+  stat:
+    path: "{{nodejs_root_path}}"
+  register: node_dir
+
+- name: nodejs | Delete previous node binaries if they exist
+  file:
+    dest: "{{nodejs_root_path}}"
+    state: absent
+  when: node_dir.stat.exists
+
+- name: nodejs | Get node source file name
+  shell: find {{nodejs_home_path}} -name 'node-*.tar.gz'
+  register: node_source_file_name
+
+- name: nodejs | Check node source stat
+  stat:
+    path: "{{node_source_file_name.stdout}}"
+  register: node_source_file
+
+- name: nodejs | Unpack the nodejs binaries
+  become: yes
+  become_user: node
+  unarchive:
+    src: "{{node_source_file_name.stdout}}"
+    dest: "{{nodejs_home_path}}"
+    owner: node
+    group: node
+    mode: 0700
+
+- name: nodejs | Get node unpacked directory name
+  shell:  find {{nodejs_home_path}} -maxdepth 1 -type d -name 'node-*'
+  register: node_source_dir_name
+
+- name: nodejs | Move files the node directory
+  command: mv {{node_source_dir_name.stdout}} {{nodejs_root_path}}
+  when: not node_dir.stat.exists and node_source_dir_name.stdout.find("node-") != -1
+
+# @TODO: Find another way to edit this line instead of huge regex
+- name: nodejs | Add environment path for node
+  lineinfile:
+    dest: /etc/environment
+    state: present
+    backrefs: yes
+    regexp: '^PATH=(\"?)((?!.*{{nodejs_bin_path}})[a-zA-Z\:\/]*)(\"?)'
+    line: PATH=\1\2:{{nodejs_bin_path}}\3
+
+- name: nodejs | Add NODE_PATH for node_modules
+  lineinfile:
+    dest: /etc/environment
+    state: present
+    regexp: 'NODE_PATH'
+    line: NODE_PATH="{{nodejs_root_path}}/lib/node_modules"
+    insertafter: EOF

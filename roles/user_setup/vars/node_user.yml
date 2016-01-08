@@ -1,0 +1,10 @@
+---
+# Variable file to define the user to be created
+
+user_data:
+  name: "node"
+  createhome: yes
+  generate_ssh_key: no
+  shell: /bin/bash
+  system: no
+  state: present

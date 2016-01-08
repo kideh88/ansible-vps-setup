@@ -1,0 +1,53 @@
+# SECTION: Global settings
+# Flush previous configuration
+iptables -t nat -F
+iptables -F
+iptables -Z
+iptables -X
+
+# Set system to most secure and drop any packets that is not explicitly allowed
+security="DROP"
+iptables -P INPUT $security
+iptables -P OUTPUT $security
+iptables -P FORWARD $security
+
+# SECTION: General protection
+# Allow previously established connections
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# Allow all localhost requests
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A OUTPUT -o lo -j ACCEPT
+
+# Drop SYN flood and fragmented packages
+iptables -A INPUT -p tcp ! --syn -m state --state NEW -j DROP
+iptables -A INPUT -p tcp --syn -m limit --limit 1/s --limit-burst 4 -j ACCEPT
+iptables -A INPUT -p tcp --syn -j DROP
+iptables -A INPUT -f -j DROP
+# Drop port scans
+iptables -A INPUT -p tcp --tcp-flags SYN,ACK,FIN,RST RST -m limit --limit 1/s -j DROP
+
+# SECTION: Specifically allowed services
+# Allow SSH connections in and out of the server
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+iptables -A INPUT -p tcp --sport 22 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 22 -j ACCEPT
+iptables -A OUTPUT -p tcp --sport 22 -j ACCEPT
+
+# Allow DNS traffic outbound
+iptables -A INPUT -p udp --sport 53 -j ACCEPT
+iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
+
+# Allow NTP traffic outbound
+iptables -A INPUT -p udp --sport 123 -j ACCEPT
+iptables -A OUTPUT -p udp --dport 123 -j ACCEPT
+
+# Allow HTTP and HTTPS inbound and outbound
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A OUTPUT -p tcp --sport 80 -j ACCEPT
+iptables -A INPUT -p tcp --sport 80 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+iptables -A OUTPUT -p tcp --sport 443 -j ACCEPT
+iptables -A INPUT -p tcp --sport 443 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 443 -j ACCEPT

@@ -1,0 +1,51 @@
+- name: nginx | Installs nginx-extra on server
+  apt:
+    pkg: nginx-extras
+    state: installed
+    update_cache: true
+  notify:
+    - start nginx
+
+
+- name: nginx | Creates config directory for custom restrictions
+  file:
+    path: /etc/nginx/conf.global
+    mode: 0700
+    state: directory
+
+- name: nginx | Upload restrictions config file
+  copy:
+    src: restrictions.conf
+    dest: /etc/nginx/conf.global/
+    mode: 0700
+  notify:
+    - start nginx
+
+
+- name: nginx | Delete default nginx site config
+  file:
+    path: /etc/nginx/sites-available/default
+    state: absent
+
+- name: nginx | Delete default nginx site config symlink
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: nginx | Upload default site config file
+  copy:
+    src: default
+    dest: /etc/nginx/sites-available/{{site_name}}
+    mode: 0700
+  register: site_config
+  when: site_name is defined
+
+- name: nginx | Creates symlink for default config in sites-enabled
+  file:
+    src: /etc/nginx/sites-available/{{site_name}}
+    dest: /etc/nginx/sites-enabled/{{site_name}}
+    mode: 0700
+    state: link
+  when: site_config|success
+  notify:
+    - start nginx

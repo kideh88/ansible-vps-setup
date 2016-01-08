@@ -1,0 +1,32 @@
+- name: Security | Create iptables directory
+  file:
+    dest: /etc/iptables
+    state: directory
+
+- name: Security | Change highsecurity file to executable
+  file:
+    dest: ./roles/security/files/highsecurity
+    mode: 0700
+
+- name: Security | Execute the highsecurity file
+  shell: ./roles/security/files/highsecurity
+
+- name: Security | Save current iptables configuration
+  shell: iptables-save -c > /etc/iptables/highsecurity
+  always_run: yes
+  notify:
+    - restart iptables
+
+- name: Security | Upload iptables preup script file
+  copy:
+    src: iptablesload
+    dest: /etc/network/if-pre-up.d/iptablesload
+  notify:
+    - restart iptables
+
+- name: Security | Disallow password authentication
+  replace:
+    dest: /etc/ssh/sshd_config
+    regexp: '[\#]?PasswordAuthentication\s((yes)|(no))?'
+    replace: "PasswordAuthentication no"
+  notify: restart ssh

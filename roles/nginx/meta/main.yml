@@ -1,0 +1,6 @@
+---
+allow_duplicates: yes
+
+dependencies: []
+# Add this dependecy if a new nginx system user is added
+#  - { role: user_setup, user_file: "nginx_user.yml" }

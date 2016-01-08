@@ -1,0 +1,32 @@
+---
+
+- name: Users | Load in user data vars
+  include_vars: "{{user_file}}"
+
+- name: Users | Create new user
+  user:
+    name: "{{user_data.name}}"
+    createhome: "{{user_data.createhome}}"
+    home: /home/{{user_data.name}}
+    generate_ssh_key: "{{user_data.generate_ssh_key}}"
+    shell: "{{user_data.shell}}"
+    system: "{{user_data.system}}"
+    state: "{{user_data.state}}"
+
+- name: Users | Creates ssh directory for copying key
+  file:
+    path: /home/{{user_data.name}}/.ssh
+    state: directory
+    owner:  "{{user_data.name}}"
+    group:  "{{user_data.name}}"
+    mode: 0755
+  when: user_data.pub_ssh_key is defined
+
+- name: Users | Copy SSH Public key to user .ssh directory
+  copy:
+    content:  "{{user_data.pub_ssh_key}}"
+    dest: /home/{{user_data.name}}/.ssh/authorized_keys
+    mode: 0600
+    owner:  "{{user_data.name}}"
+    group:  "{{user_data.name}}"
+  when: user_data.pub_ssh_key is defined

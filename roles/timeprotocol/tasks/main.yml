@@ -1,0 +1,17 @@
+- name: ntp | Install Network Time Protocol
+  apt:
+    pkg: ntp
+    state: installed
+    update_cache: true
+
+- name: ntp | Set timezone variable
+  copy:
+    content: '{{server_timezone}}'
+    dest: /etc/timezone
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+
+- name: ntp | Update timezone
+  shell: dpkg-reconfigure --frontend noninteractive tzdata

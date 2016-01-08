@@ -1,0 +1,11 @@
+---
+# Variable file to define the user to be created
+
+user_data:
+  name: "kim"
+  createhome: yes
+  generate_ssh_key: no
+  pub_ssh_key: "{{ kim_ssh_pub_key }}"
+  shell: /bin/bash
+  system: no
+  state: present

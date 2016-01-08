@@ -1,0 +1,110 @@
+- name: mysql | Installs mysql on server
+  apt:
+    pkg: mysql-server
+    state: installed
+    update_cache: true
+  notify:
+    - start mysql
+
+- name: mysql | Installs adapter on server
+  apt:
+    pkg: python-mysqldb
+    state: installed
+    update_cache: true
+
+- name: mysql | Change mysql root user password
+  mysql_user:
+    name: root
+    host: localhost
+    password: "{{mysql_root_pass}}"
+    login_user: root
+    login_password: ""
+    state: present
+  ignore_errors: yes
+
+- name: mysql | Change mysql root user password
+  mysql_user:
+    name: root
+    host: localhost
+    password: "{{mysql_root_pass}}"
+    login_user: root
+    login_password: "{{mysql_root_pass}}"
+    state: present
+  with_items:
+    - 127.0.0.1
+    - ::1
+  ignore_errors: yes
+
+- name: Create .my.cnf file with root password credentials
+  template:
+    src: root.my.cnf.j2
+    dest: /root/.my.cnf
+    owner: root
+    group: root
+    mode: 0600
+  notify:
+    - start mysql
+
+- name: mysql | Set database connection to be localhost only
+  copy:
+    src: my.cnf
+    dest: /etc/alternatives/
+    force: yes
+    mode: 0700
+  notify:
+    - start mysql
+
+- name: mysql | Create new databases
+  mysql_db:
+    name: "{{item.dbname}}"
+    encoding: "{{item.dbencoding}}"
+    state: present
+  with_items: new_databases
+
+- name: mysql | Create new mysql users and grant priveleges to newly created dbs
+  mysql_user:
+    name: "{{item.user}}"
+    password: "{{item.pass}}"
+    priv: "{{item.dbname}}.*:ALL"
+    state: present
+  with_items: new_databases
+
+# Following tasks from vdvm@github.com at https://github.com/PCextreme/ansible-role-mariadb/blob/master/tasks/mysql_secure_installation.yml
+
+- name: mysql | Reload privilege tables
+  command: 'mysql -ne "{{item}}"'
+  with_items:
+    - FLUSH PRIVILEGES
+  changed_when: False
+
+- name: mysql | Remove anonymous users
+  command: 'mysql -ne "{{item}}"'
+  with_items:
+    - DELETE FROM mysql.user WHERE User=''
+  changed_when: False
+
+- name: mysql | Disallow root login remotely
+  command: 'mysql -ne "{{item}}"'
+  with_items:
+    - DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')
+  changed_when: False
+
+# Add a check to see if test db exists
+- name: Find out the master log file name and position
+  command: mysql -uroot -p{{mysql_root_pass}} -e "SHOW DATABASES;"
+  register: existing_databases
+
+- name: mysql | Remove test database and access to it
+  command: 'mysql -ne "{{item}}"'
+  with_items:
+    - DROP DATABASE test
+    - DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%'
+  changed_when: False
+  ignore_errors: True
+  when: existing_databases.stdout.find('test') != -1
+
+- name: mysql | Reload privilege tables
+  command: 'mysql -ne "{{item}}"'
+  with_items:
+    - FLUSH PRIVILEGES
+  changed_when: False

@@ -1,0 +1,5 @@
+---
+allow_duplicates: yes
+
+dependencies:
+  - { role: user_setup, user_file: "node_user.yml" }

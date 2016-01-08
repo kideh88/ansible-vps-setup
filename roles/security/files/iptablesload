@@ -1,0 +1,3 @@
+#!/bin/sh
+iptables-restore < /etc/iptables/highsecurity
+exit 0

@@ -1,0 +1,10 @@
+---
+# Variable file to define the user to be created
+
+user_data:
+  name: "nginx"
+  createhome: no
+  generate_ssh_key: no
+  shell: /bin/false
+  system: yes
+  state: present
