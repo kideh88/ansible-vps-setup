@@ -24,7 +24,7 @@ Using vault requires a vault_pass file in /etc/ansible. Name and path can be cha
 ## Roles
 
 * Security - Contains iptables to set up [Nexination highsecurity](https://github.com/Nexination/configuration-collection/blob/master/etc/iptables/highsecurity) rules for your server, also disables password authentication
-* User setup - Creates users based on small user config files (see [kim_user.yml](https://github.com/kideh88/ansible-vps-setup/blob/master/mkk_config/vars/kim_user.yml))
+* User setup - Creates users based on small user config files (see [kim_user.yml](https://github.com/kideh88/ansible-vps-setup/blob/master/mkk_config/vars/kim_user.yml) example)
 * NTP - Installs ntp and set correct timezone for server
 * nodejs - Fetches node binaries and sets PATH variables, creates a node user in meta
 * nginx - Installs nginx and defines default site-available/-enabled with [Nexination restrictions.conf](https://github.com/Nexination/configuration-collection/blob/master/etc/nginx/global/restrictions.conf)
