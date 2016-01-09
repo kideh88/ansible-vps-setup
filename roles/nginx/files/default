@@ -8,7 +8,7 @@ server {
 	listen [::]:80;
 
 	server_name hook-mkk;
-	server_tokens = off:
+	server_tokens off;
 
 	root /var/www/html;
 	index index.html index.htm;

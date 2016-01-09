@@ -19,7 +19,7 @@
     dest: /etc/nginx/conf.global/
     mode: 0700
   notify:
-    - start nginx
+    - restart nginx
 
 
 - name: nginx | Delete default nginx site config
@@ -48,4 +48,4 @@
     state: link
   when: site_config|success
   notify:
-    - start nginx
+    - restart nginx
