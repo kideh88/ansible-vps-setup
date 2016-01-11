@@ -4,7 +4,7 @@
     state: installed
     update_cache: true
   notify:
-    - start nginx
+    - restart nginx
 
 
 - name: nginx | Creates config directory for custom restrictions

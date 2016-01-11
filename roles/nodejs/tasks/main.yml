@@ -43,7 +43,7 @@
 
 - name: nodejs | Move files the node directory
   command: mv {{node_source_dir_name.stdout}} {{nodejs_root_path}}
-  when: not node_dir.stat.exists and node_source_dir_name.stdout.find("node-") != -1
+  when: node_source_dir_name.stdout.find("node-") != -1
 
 # @TODO: Find another way to edit this line instead of huge regex
 - name: nodejs | Add environment path for node
