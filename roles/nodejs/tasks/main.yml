@@ -7,25 +7,9 @@
   become_user: node
   register: node_source_downloaded
 
-- name: nodejs | Check node directory stat
-  stat:
-    path: "{{nodejs_root_path}}"
-  register: node_dir
-
-- name: nodejs | Delete previous node binaries if they exist
-  file:
-    dest: "{{nodejs_root_path}}"
-    state: absent
-  when: node_dir.stat.exists
-
 - name: nodejs | Get node source file name
   shell: find {{nodejs_home_path}} -name 'node-*.tar.gz'
   register: node_source_file_name
-
-- name: nodejs | Check node source stat
-  stat:
-    path: "{{node_source_file_name.stdout}}"
-  register: node_source_file
 
 - name: nodejs | Unpack the nodejs binaries
   become: yes
@@ -38,12 +22,26 @@
     mode: 0700
 
 - name: nodejs | Get node unpacked directory name
-  shell:  find {{nodejs_home_path}} -maxdepth 1 -type d -name 'node-*'
-  register: node_source_dir_name
+  set_fact:
+    node_source_dir_name: "{{node_source_file_name.stdout.replace('.tar.gz', '')}}"
 
-- name: nodejs | Move files the node directory
-  command: mv {{node_source_dir_name.stdout}} {{nodejs_root_path}}
-  when: node_source_dir_name.stdout.find("node-") != -1
+- name: nodejs | Check node directory stat
+  stat:
+    path: "{{nodejs_root_path}}"
+  register: node_dir
+
+- name: nodejs | Move files into the node directory (overwrite)
+  command: cp -TRf {{node_source_dir_name}} {{nodejs_root_path}}
+  when: node_dir.stat.exists
+
+- name: nodejs | Rename unpacked files to node directory
+  command: mv {{node_source_dir_name}} {{nodejs_root_path}}
+  when: not node_dir.stat.exists
+
+- name: nodejs | Delete source directory
+  file:
+    dest: "{{node_source_dir_name}}"
+    state: absent
 
 # @TODO: Find another way to edit this line instead of huge regex
 - name: nodejs | Add environment path for node
